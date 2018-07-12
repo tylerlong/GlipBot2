@@ -227,7 +227,7 @@ app.post('/glip/receive', function (req, res) {
 
 //Posts a message in the glip group
 function postMessageOnGlip(groupID, message) {
-
+    console.log('posting message', groupID, message)
     platform.post('/restapi/v1.0/glip/groups/' + groupID + "/posts", { "text": message }
     ).then(function () {
         console.log('Successfully posted Message to groupID:' + groupID, '"' + message + '"');
@@ -245,12 +245,24 @@ function getBotIdentity() {
             var identity = JSON.parse(extensionInfo.text());
             console.log("Bot Identity :" + JSON.stringify(identity));
             botID = identity.id;
-            subscribeToGlipEvents();
+            removeExistingSubscriptions();
+            setTimeout(() => {
+                subscribeToGlipEvents()
+            }, 3000); // wait for deletion of existing subscriptions
             IsBotAddedToGlip();
         }).catch(function (e) {
             console.error(e);
             throw e;
         })
+}
+
+function removeExistingSubscriptions() {
+    platform.get('/subscription').then(r => {
+        for(const sub of r.json().records) {
+            console.log('remove existing subscription')
+            platform.delete(`/subscription/${sub.id}`)
+        }
+    })
 }
 
 
@@ -341,7 +353,7 @@ function respondToPosts(body) {
     var messageText = body.text;
 
     if (creatorID != botID && messageType == 'TextMessage') {
-        console.log('creator: '+ creatorID+ ' groupID: '+  botID);
+        console.log('creator: '+ creatorID+ ' groupID: '+  groupID);
         if (messageText == "Hello") {
             postMessageOnGlip(groupID,welcomeMessage)
         } else if (messageText.match(getBusinessHoursAccount)) {
