@@ -1,10 +1,14 @@
 {
+  "scripts": {
+    "test": "node index.js"
+  },
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "ringcentral": "^3.2.0"
   },
   "devDependencies": {
-    "dotenv": "^6.0.0"
+    "dotenv": "^6.0.0",
+    "ngrok": "^3.0.1"
   }
 }
